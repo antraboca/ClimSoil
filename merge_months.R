@@ -1,3 +1,12 @@
+#This code was written in RStudio on Windows
+
+# The soil data are described in 
+# Batjes, N.H., 2012. ISRIC-WISE derived soil properties on a 5 by 5 arc-minutes global grid (ver. 1.2), 
+# Report 2012/01, ISRIC - World Soil Information, Wageningen (with data-set available at www.isric.org).
+# the soil raster file can be found here: 
+# https://data.isric.org/geonetwork/srv/eng/catalog.search#/metadata/82f3d6b0-a045-4fe2-b960-6d05bc1f37c0
+
+
 ### Load packages
 library(raster)
 library(sp)
@@ -12,16 +21,10 @@ library(doSNOW)
 library(foreach)
 library(doParallel)
 
-
-
-r <- raster("C:/Users/aboca/Desktop/OTMED/wise_05min_v12/Grid/smw5by5min/w001001.adf") # soil raster file
-#test<-raster("C:/Users/aboca/Desktop/OTMED/WISE5by5min/wise_05min_v12.tif")
-#test2<-raster("C:/Users/aboca/Desktop/OTMED/FutureClimate/ip26tn70/ip26tn701.tif")
-
 #### List with files in Gtiff directory
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
 
-#### This is the function to load rasters so do not change anytying in this function, it should work as it is, I hope (Titia)
+#### function to load rasters 
 load_raster <- function (x) {
     maps <- list()
     for (rast in 1:length(x)) {  
@@ -31,8 +34,12 @@ load_raster <- function (x) {
 }
 
 
-#### Correct filename so that there is 01...10, 11, so that it can be correctly read-in 
-setwd("C:/Users/aboca/Desktop/OTMED/MIROC/mr85pr70")
+Sys.setenv(R_USER="/my/desired/path/to/file")
+
+#### soil raster file
+r <- raster("w001001.adf") 
+
+#### Correct the original filename so that there is 01...10, 11, so that it can be correctly read-in 
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
 fc_prec<- load_raster(gtif.files)
 fc_prec.o <- stack(fc_prec)
@@ -47,7 +54,6 @@ fc_prec.o <- stack(fc_prec)
 fc_prec.o
 
 
-setwd("C:/Users/aboca/Desktop/OTMED/MIROC/mr85tx70")
 #### Correct filename so that there is 01...10, 11, so that it can be correctly read-in 
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
 fc_tmax <- load_raster(gtif.files)
@@ -63,7 +69,6 @@ names(fc_tmax) <- c( "fc70_tmax_01", "fc70_tmax_02", "fc70_tmax_03" ,
 fc_tmax.o <- stack(fc_tmax)
 fc_tmax.o
 
-setwd("C:/Users/aboca/Desktop/OTMED/MIROC/mr85tn70")
 #### Correct filename so that there is 01...10, 11, so that it can be correctly read-in 
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
 fc_tmin <- load_raster(gtif.files)
@@ -80,7 +85,7 @@ fc_tmin.o
 
 
 
-setwd("C:/Users/aboca/Desktop/OTMED/MIROC/mr85pr70/Output")
+# define the output folder setwd("..Output")
 detectCores()
 cl <- makeCluster(2)   ### Create cluster
 registerDoParallel(cl)
