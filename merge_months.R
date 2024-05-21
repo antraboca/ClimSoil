@@ -1,11 +1,17 @@
 #This code was written in RStudio on Windows
 
-# The soil data are described in 
+# the soil raster file is available at: 
+# https://data.isric.org/geonetwork/srv/eng/catalog.search#/metadata/82f3d6b0-a045-4fe2-b960-6d05bc1f37c0
+# The soil data are described by 
 # Batjes, N.H., 2012. ISRIC-WISE derived soil properties on a 5 by 5 arc-minutes global grid (ver. 1.2), 
 # Report 2012/01, ISRIC - World Soil Information, Wageningen (with data-set available at www.isric.org).
-# the soil raster file can be found here: 
-# https://data.isric.org/geonetwork/srv/eng/catalog.search#/metadata/82f3d6b0-a045-4fe2-b960-6d05bc1f37c0
 
+
+# The climate data (WorldClim version 1.4) are available at:
+# https://www.worldclim.org/data/v1.4/worldclim14.html
+# Described by 
+# Hijmans, R.J., Cameron, S.E., Parra, J.L., Jones, P.G., Jarvis, A., 2005. Very high resolution interpolated climate surfaces for global land areas. 
+# Int. J. Climatol. 25, 1965–1978. https://doi.org/10.1002/joc.1276
 
 ### Load packages
 library(raster)
@@ -39,49 +45,50 @@ Sys.setenv(R_USER="/my/desired/path/to/file")
 #### soil raster file
 r <- raster("w001001.adf") 
 
+# set path to folder containing precipitation data
 #### Correct the original filename so that there is 01...10, 11, so that it can be correctly read-in 
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
-fc_prec<- load_raster(gtif.files)
-fc_prec.o <- stack(fc_prec)
-fc_prec.o
+cc_prec<- load_raster(gtif.files)
+cc_prec.o <- stack(cc_prec)
+cc_prec.o
 
-names(fc_prec) <- c( "fc70_prec_01", "fc70_prec_02", "fc70_prec_03" ,
-                     "fc70_prec_04", "fc70_prec_05" ,"fc70_prec_06" ,
-                     "fc70_prec_07", "fc70_prec_08", "fc70_prec_09",
-                     "fc70_prec_10", "fc70_prec_11", "fc70_prec_12")
+names(cc_prec) <- c( "prec_01", "prec_02", "prec_03" ,
+                     "prec_04", "prec_05" ,"prec_06" ,
+                     "prec_07", "prec_08", "prec_09",
+                     "prec_10", "prec_11", "prec_12")
 
-fc_prec.o <- stack(fc_prec)
+cc_prec.o <- stack(cc_prec)
 fc_prec.o
 
 
 #### Correct filename so that there is 01...10, 11, so that it can be correctly read-in 
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
-fc_tmax <- load_raster(gtif.files)
-fc_tmax.o <- stack(fc_tmax)
-fc_tmax.o
+cc_tmax <- load_raster(gtif.files)
+cc_tmax.o <- stack(fc_tmax)
+cc_tmax.o
 
-plot(fc_tmax.o)
-names(fc_tmax) <- c( "fc70_tmax_01", "fc70_tmax_02", "fc70_tmax_03" ,
-                      "fc70_tmax_04", "fc70_tmax_05" ,"fc70_tmax_06" ,
-                      "fc70_tmax_07", "fc70_tmax_08", "fc70_tmax_09",
-                      "fc70_tmax_10", "fc70_tmax_11", "fc70_tmax_12")
+plot(cc_tmax.o)
+names(cc_tmax) <- c( "tmax_01", "tmax_02", "tmax_03" ,
+                      "tmax_04", "tmax_05" ,"tmax_06" ,
+                      "tmax_07", "tmax_08", "tmax_09",
+                      "tmax_10", "tmax_11", "tmax_12")
 
-fc_tmax.o <- stack(fc_tmax)
-fc_tmax.o
+cc_tmax.o <- stack(cc_tmax)
+cc_tmax.o
 
 #### Correct filename so that there is 01...10, 11, so that it can be correctly read-in 
 gtif.files <- list.files(path=".", pattern=".tif", all.files=TRUE)
-fc_tmin <- load_raster(gtif.files)
-fc_tmin.o <- stack(fc_tmin)
-fc_tmin.o
+cc_tmin <- load_raster(gtif.files)
+cc_tmin.o <- stack(cc_tmin)
+cc_tmin.o
 
-names(fc_tmin) <- c( "fc70_tmin_01", "fc70_tmin_02", "fc70_tmin_03" ,
-                     "fc70_tmin_04", "fc70_tmin_05" ,"fc70_tmin_06" ,
-                     "fc70_tmin_07", "fc70_tmin_08", "fc70_tmin_09",
-                     "fc70_tmin_10", "fc70_tmin_11", "fc70_tmin_12")
+names(cc_tmin) <- c( "tmin_01", "tmin_02", "tmin_03" ,
+                     "tmin_04", "tmin_05" ,"tmin_06" ,
+                     "tmin_07", "tmin_08", "tmin_09",
+                     "tmin_10", "tmin_11", "tmin_12")
 
-fc_tmin.o <- stack(fc_tmin)
-fc_tmin.o
+cc_tmin.o <- stack(cc_tmin)
+cc_tmin.o
 
 
 
@@ -93,11 +100,11 @@ getDoParWorkers()
 
 system.time(Prec1 <- foreach(i=1:6, .packages="raster") %dopar% {
   
-  ### From january to june, select the  half from the northern hemisphere, 
-  # and their equivalent form the southern hemisphere
+  ### From january to june, select half from the northern hemisphere, 
+  # and the equivalent form the southern hemisphere
   
-  r1 <- crop(fc_prec[[i]], extent(-180,180,0,90))
-  r2 <- crop(fc_prec[[i+6]], extent(-180,180,-90,0))
+  r1 <- crop(cc_prec[[i]], extent(-180,180,0,90))
+  r2 <- crop(cc_prec[[i+6]], extent(-180,180,-90,0))
   m <- merge(r1, r2)
   
   ## Save as Geotiff file file in the output directory
